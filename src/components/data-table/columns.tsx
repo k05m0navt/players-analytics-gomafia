@@ -98,7 +98,17 @@ export const columns: ColumnDef<PlayerData>[] = [
   },
   {
     accessorKey: "year",
-    header: "Year",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Year
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const year = row.original.year;
       return <div>{year || "N/A"}</div>;
