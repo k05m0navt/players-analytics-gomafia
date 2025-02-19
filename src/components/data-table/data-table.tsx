@@ -166,27 +166,70 @@ export function DataTable<TData extends { id: string; region: string }>({
     Object.entries(regionNameMap).map(([k, v]) => [v, k])
   );
 
+  // Helper function to format selected regions
+  const formatSelectedRegions = (selectedRegions?: string[]) => {
+    // If selectedRegions is undefined or empty, return default text
+    if (!selectedRegions || selectedRegions.length === 0)
+      return "Select Regions";
+
+    // Map internal keys to display names
+    const displayRegions = selectedRegions.map(
+      (region) => regionNameMap[region] || region
+    );
+
+    // If only one region, return its name
+    if (displayRegions.length === 1) return displayRegions[0];
+
+    // For multiple regions, show count
+    return `${displayRegions.length} regions selected`;
+  };
+
   // Update column filters while preserving other filters
   const updateColumnFilters = (newFilter: {
     id: string;
     value: string | string[];
   }) => {
     setColumnFilters((prevFilters) => {
-      // Remove existing filter for the same column
-      const filteredPrevFilters = prevFilters.filter(
-        (filter) => filter.id !== newFilter.id
+      // Create a copy of previous filters
+      const updatedFilters = [...prevFilters];
+
+      // Find index of existing filter for this column
+      const existingFilterIndex = updatedFilters.findIndex(
+        (filter) => filter.id === newFilter.id
       );
 
-      // Add new filter if value is not empty
-      return newFilter.value
-        ? [
-            ...filteredPrevFilters,
-            {
-              id: newFilter.id,
-              value: newFilter.value,
-            },
-          ]
-        : filteredPrevFilters;
+      // Remove existing filter if it exists
+      if (existingFilterIndex !== -1) {
+        updatedFilters.splice(existingFilterIndex, 1);
+      }
+
+      // Special handling for region filter
+      if (newFilter.id === "region") {
+        // If no value or empty array, add a special 'show all' filter
+        if (
+          !newFilter.value ||
+          (Array.isArray(newFilter.value) && newFilter.value.length === 0)
+        ) {
+          updatedFilters.push({
+            id: newFilter.id,
+            value: [], // Explicit all-inclusive filter
+          });
+        } else {
+          // Add the new filter
+          updatedFilters.push({
+            id: newFilter.id,
+            value: newFilter.value,
+          });
+        }
+      } else {
+        // For non-region filters, add as normal
+        updatedFilters.push({
+          id: newFilter.id,
+          value: newFilter.value,
+        });
+      }
+
+      return updatedFilters;
     });
   };
 
@@ -252,9 +295,7 @@ export function DataTable<TData extends { id: string; region: string }>({
           <Popover>
             <PopoverTrigger asChild>
               <Button variant="outline" className="w-[200px] justify-start">
-                {selectedRegion && selectedRegion.length > 0
-                  ? selectedRegion[0]
-                  : "Select Regions"}
+                {formatSelectedRegions(selectedRegion)}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[200px] p-0" align="start">
@@ -302,7 +343,7 @@ export function DataTable<TData extends { id: string; region: string }>({
                                           (key) => regionNameMap[key] === r
                                         ) || r
                                     )
-                                  : [""], // Pass an empty string to show all data
+                                  : [], // Pass an empty string to show all data
                             });
                           }}
                         >
@@ -420,7 +461,8 @@ export function DataTable<TData extends { id: string; region: string }>({
 
         <div className="flex items-center space-x-2">
           <div className="flex w-[100px] items-center justify-center text-sm font-medium">
-            Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()}
           </div>
           <div className="flex items-center space-x-2">
             <Button
@@ -441,66 +483,86 @@ export function DataTable<TData extends { id: string; region: string }>({
               <span className="sr-only">Go to previous page</span>
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            
+
             {/* Page Number Buttons */}
             {table.getPageCount() > 0 && (
               <div className="flex items-center space-x-1">
-                {table.getPageCount() > 5 && table.getState().pagination.pageIndex > 2 && (
-                  <Button
-                    variant="outline"
-                    className="h-8 w-8 p-0"
-                    onClick={() => table.setPageIndex(0)}
-                  >
-                    1
-                  </Button>
-                )}
-                
-                {table.getPageCount() > 5 && table.getState().pagination.pageIndex > 2 && (
-                  <span className="text-sm">...</span>
+                {table.getPageCount() > 5 &&
+                  table.getState().pagination.pageIndex > 2 && (
+                    <Button
+                      variant="outline"
+                      className="h-8 w-8 p-0"
+                      onClick={() => table.setPageIndex(0)}
+                    >
+                      1
+                    </Button>
+                  )}
+
+                {table.getPageCount() > 5 &&
+                  table.getState().pagination.pageIndex > 2 && (
+                    <span className="text-sm">...</span>
+                  )}
+
+                {[...Array(Math.min(5, table.getPageCount()))].map(
+                  (_, index) => {
+                    const pageNumber =
+                      table.getState().pagination.pageIndex < 2
+                        ? index
+                        : table.getState().pagination.pageIndex - 2 + index;
+
+                    // Adjust for last pages
+                    const adjustedPageNumber =
+                      table.getState().pagination.pageIndex >=
+                      table.getPageCount() - 3
+                        ? table.getPageCount() - 5 + index
+                        : pageNumber;
+
+                    if (
+                      adjustedPageNumber < 0 ||
+                      adjustedPageNumber >= table.getPageCount()
+                    )
+                      return null;
+
+                    return (
+                      <Button
+                        key={adjustedPageNumber}
+                        variant={
+                          adjustedPageNumber ===
+                          table.getState().pagination.pageIndex
+                            ? "default"
+                            : "outline"
+                        }
+                        className="h-8 w-8 p-0"
+                        onClick={() => table.setPageIndex(adjustedPageNumber)}
+                      >
+                        {adjustedPageNumber + 1}
+                      </Button>
+                    );
+                  }
                 )}
 
-                {[...Array(Math.min(5, table.getPageCount()))].map((_, index) => {
-                  const pageNumber = 
-                    table.getState().pagination.pageIndex < 2
-                      ? index
-                      : table.getState().pagination.pageIndex - 2 + index;
-                  
-                  // Adjust for last pages
-                  const adjustedPageNumber = 
-                    table.getState().pagination.pageIndex >= table.getPageCount() - 3
-                      ? table.getPageCount() - 5 + index
-                      : pageNumber;
-                  
-                  if (adjustedPageNumber < 0 || adjustedPageNumber >= table.getPageCount()) return null;
-                  
-                  return (
+                {table.getPageCount() > 5 &&
+                  table.getState().pagination.pageIndex <
+                    table.getPageCount() - 3 && (
+                    <span className="text-sm">...</span>
+                  )}
+
+                {table.getPageCount() > 5 &&
+                  table.getState().pagination.pageIndex <
+                    table.getPageCount() - 3 && (
                     <Button
-                      key={adjustedPageNumber}
-                      variant={adjustedPageNumber === table.getState().pagination.pageIndex ? "default" : "outline"}
+                      variant="outline"
                       className="h-8 w-8 p-0"
-                      onClick={() => table.setPageIndex(adjustedPageNumber)}
+                      onClick={() =>
+                        table.setPageIndex(table.getPageCount() - 1)
+                      }
                     >
-                      {adjustedPageNumber + 1}
+                      {table.getPageCount()}
                     </Button>
-                  );
-                })}
-                
-                {table.getPageCount() > 5 && table.getState().pagination.pageIndex < table.getPageCount() - 3 && (
-                  <span className="text-sm">...</span>
-                )}
-                
-                {table.getPageCount() > 5 && table.getState().pagination.pageIndex < table.getPageCount() - 3 && (
-                  <Button
-                    variant="outline"
-                    className="h-8 w-8 p-0"
-                    onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-                  >
-                    {table.getPageCount()}
-                  </Button>
-                )}
+                  )}
               </div>
             )}
-            
+
             <Button
               variant="outline"
               className="h-8 w-8 p-0"

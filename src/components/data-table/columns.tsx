@@ -60,10 +60,10 @@ const regionNameMap: { [key: string]: string } = {
 // Define the custom sorting order for player categories
 const playerCategorySortOrder = [
   "Expert",
-  "Advanced", 
-  "Intermediate", 
-  "Beginner", 
-  "Novice"
+  "Advanced",
+  "Intermediate",
+  "Beginner",
+  "Novice",
 ];
 
 export const columns: ColumnDef<PlayerData>[] = [
@@ -106,7 +106,17 @@ export const columns: ColumnDef<PlayerData>[] = [
   },
   {
     accessorKey: "region",
-    header: "Region",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Region
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       const region = row.original.region;
       const mappedRegion = regionNameMap[region] || region;
@@ -114,22 +124,43 @@ export const columns: ColumnDef<PlayerData>[] = [
     },
     enableSorting: true,
     filterFn: (row, columnId, filterValue) => {
+      // Special case: show all rows for empty, null, or special filter
+      if (
+        !filterValue ||
+        (Array.isArray(filterValue) &&
+          (filterValue.length === 0 ||
+            filterValue[0] === "__ALL__" ||
+            filterValue[0] === ""))
+      ) {
+        return true;
+      }
+
+      // Defensive handling of row and region
+      if (!row?.original?.region) return true;
+
       const region = row.original.region;
       const mappedRegion = regionNameMap[region] || region;
 
-      // If no filter is applied or filter is an empty string, show all rows
-      if (!filterValue || filterValue === "" || filterValue.length === 0)
-        return true;
-
-      // Convert filter value to an array if it's a string
+      // Normalize filter values
       const filterValues = Array.isArray(filterValue)
         ? filterValue
         : [filterValue];
 
-      // Check if the region matches any of the filter values
-      return filterValues.some(
-        (val) => val === "" || val === region || val === mappedRegion
-      );
+      // Comprehensive matching logic
+      return filterValues.some((val) => {
+        // Direct match with region key
+        if (val === region) return true;
+
+        // Match with mapped region display name
+        if (val === mappedRegion) return true;
+
+        // Case-insensitive match with display name
+        const normalizedVal = val.toLowerCase();
+        const normalizedMappedRegion = mappedRegion.toLowerCase();
+
+        // Check if the filter value matches the display name
+        return normalizedVal === normalizedMappedRegion;
+      });
     },
   },
   {
@@ -705,7 +736,9 @@ export const columns: ColumnDef<PlayerData>[] = [
       if (indexB !== -1) return 1;
 
       // If neither category is in the custom sort order, use default string comparison
-      return categoryA.localeCompare(categoryB, undefined, { sensitivity: "base" });
+      return categoryA.localeCompare(categoryB, undefined, {
+        sensitivity: "base",
+      });
     },
   },
 ];
