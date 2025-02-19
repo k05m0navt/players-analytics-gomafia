@@ -133,7 +133,7 @@ export const columns: ColumnDef<PlayerData>[] = [
       return <div>{mappedRegion ?? "N/A"}</div>;
     },
     enableSorting: true,
-    filterFn: (row, columnId, filterValue) => {
+    filterFn: (row, _, filterValue) => {
       // Special case: show all rows for empty, null, or special filter
       if (
         !filterValue ||
@@ -549,7 +549,7 @@ export const columns: ColumnDef<PlayerData>[] = [
       const rank = row.original.overall_rank;
       return rank !== null ? rank : "N/A";
     },
-    sortingFn: (rowA, rowB, columnId) => {
+    sortingFn: (rowA, rowB) => {
       const rankA = rowA.original.overall_rank;
       const rankB = rowB.original.overall_rank;
 
@@ -582,7 +582,7 @@ export const columns: ColumnDef<PlayerData>[] = [
       const rank = row.original.citizen_rank;
       return rank !== null ? rank : "N/A";
     },
-    sortingFn: (rowA, rowB, columnId) => {
+    sortingFn: (rowA, rowB) => {
       const rankA = rowA.original.citizen_rank;
       const rankB = rowB.original.citizen_rank;
 
@@ -615,7 +615,7 @@ export const columns: ColumnDef<PlayerData>[] = [
       const rank = row.original.sheriff_rank;
       return rank !== null ? rank : "N/A";
     },
-    sortingFn: (rowA, rowB, columnId) => {
+    sortingFn: (rowA, rowB) => {
       const rankA = rowA.original.sheriff_rank;
       const rankB = rowB.original.sheriff_rank;
 
@@ -648,7 +648,7 @@ export const columns: ColumnDef<PlayerData>[] = [
       const rank = row.original.mafia_rank;
       return rank !== null ? rank : "N/A";
     },
-    sortingFn: (rowA, rowB, columnId) => {
+    sortingFn: (rowA, rowB) => {
       const rankA = rowA.original.mafia_rank;
       const rankB = rowB.original.mafia_rank;
 
@@ -681,7 +681,7 @@ export const columns: ColumnDef<PlayerData>[] = [
       const rank = row.original.don_rank;
       return rank !== null ? rank : "N/A";
     },
-    sortingFn: (rowA, rowB, columnId) => {
+    sortingFn: (rowA, rowB) => {
       const rankA = rowA.original.don_rank;
       const rankB = rowB.original.don_rank;
 
@@ -714,7 +714,7 @@ export const columns: ColumnDef<PlayerData>[] = [
       return <div>{category ?? "N/A"}</div>;
     },
     enableSorting: true,
-    sortingFn: (rowA, rowB, columnId) => {
+    sortingFn: (rowA, rowB) => {
       const categoryA = rowA.original.player_category;
       const categoryB = rowB.original.player_category;
 

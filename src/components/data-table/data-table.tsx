@@ -53,10 +53,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
-import { XIcon } from "lucide-react";
 import { CheckIcon } from "lucide-react";
-
-import { PlayerData } from "@/types";
 
 // Declare fuzzy filter type
 declare module "@tanstack/react-table" {
@@ -69,8 +66,7 @@ declare module "@tanstack/react-table" {
 const fuzzyFilter = <TData extends { id: string; region: string }>(
   row: Row<TData>,
   columnId: string,
-  value: string,
-  addMeta: (meta: any) => void
+  value: string
 ): boolean => {
   // If the filter value is empty, show all rows
   if (!value) return true;
@@ -130,10 +126,6 @@ export function DataTable<TData extends { id: string; region: string }>({
     { id: "year", value: String(defaultYear) },
   ]);
   const [globalFilter, setGlobalFilter] = useState("");
-  const [pagination, setPagination] = useState({
-    pageIndex: 0,
-    pageSize: 10, // Default page size
-  });
 
   // Type guard to safely extract year filter
   const getYearFilter = (filters: ColumnFiltersState): string | undefined => {
@@ -160,11 +152,6 @@ export function DataTable<TData extends { id: string; region: string }>({
 
   const selectedYear = getYearFilter(columnFilters);
   const selectedRegion = getRegionFilter(columnFilters);
-
-  // Reverse mapping for filtering
-  const regionFilterMap = Object.fromEntries(
-    Object.entries(regionNameMap).map(([k, v]) => [v, k])
-  );
 
   // Helper function to format selected regions
   const formatSelectedRegions = (selectedRegions?: string[]) => {
@@ -320,10 +307,6 @@ export function DataTable<TData extends { id: string; region: string }>({
                             key={region}
                             value={region}
                             onSelect={() => {
-                              // Convert display name back to original region key
-                              const originalRegion =
-                                regionFilterMap[region] || region;
-
                               // If the region is already selected, remove it
                               const currentRegions = selectedRegion || [];
                               const newRegions = currentRegions.includes(
