@@ -8,7 +8,7 @@ import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-bo
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "GoMafia Player Analytics",
+  title: "GoMafia Players Analytics",
   description: "Detailed player statistics for GoMafia",
   keywords: ["GoMafia", "player stats", "game analytics"],
 };
