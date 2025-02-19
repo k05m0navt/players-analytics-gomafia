@@ -295,11 +295,7 @@ export const columns: ColumnDef<PlayerData>[] = [
     },
     cell: ({ row }) => {
       const value = row.original.overall_winrate;
-      return (
-        <span className={colorizeValue(value, "percentage", "overall")}>
-          {value}%
-        </span>
-      );
+      return <span>{value}%</span>;
     },
   },
   {
@@ -420,13 +416,7 @@ export const columns: ColumnDef<PlayerData>[] = [
     },
     cell: ({ row }) => {
       const value = row.original.extra_points_avg_10_games;
-      return (
-        <span
-          className={value ? colorizeValue(value, "number", "10_games") : ""}
-        >
-          {value ? value.toFixed(2) : "N/A"}
-        </span>
-      );
+      return <span>{value ? value.toFixed(2) : "N/A"}</span>;
     },
   },
   {
