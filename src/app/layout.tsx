@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { Navbar } from "@/components/layout/navbar";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
+import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,15 +27,18 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
-          <main className="flex-grow">{children}</main>
-          <footer className="bg-muted py-6 text-center">
-            <p className="text-muted-foreground">
-              {`&copy; ${
-                process.env.NEXT_PUBLIC_CURRENT_YEAR || new Date().getFullYear()
-              } GoMafia Analytics. All rights reserved.`}
-            </p>
-          </footer>
+          <GlobalErrorBoundary>
+            <Navbar />
+            <main className="flex-grow">{children}</main>
+            <footer className="bg-muted py-6 text-center">
+              <p className="text-muted-foreground">
+                {`&copy; ${
+                  process.env.NEXT_PUBLIC_CURRENT_YEAR ||
+                  new Date().getFullYear()
+                } GoMafia Analytics. All rights reserved.`}
+              </p>
+            </footer>
+          </GlobalErrorBoundary>
         </ThemeProvider>
       </body>
     </html>
