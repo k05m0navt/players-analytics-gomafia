@@ -257,131 +257,135 @@ export function DataTable<TData extends { id: string; region: string }>({
   return (
     <div className="space-y-4">
       {/* Filters Container */}
-      <div className="flex items-center space-x-4 py-4">
+      <div className="flex flex-col items-center space-x-0 space-y-4 sm:flex-row sm:space-x-4 sm:space-y-0 sm:py-4 ">
         {/* Global Search */}
         <Input
           placeholder="Search all fields..."
           value={globalFilter ?? ""}
           onChange={(event) => setGlobalFilter(event.target.value)}
-          className="max-w-sm"
+          className="w-full sm:max-w-sm"
         />
 
-        {/* Year Filter */}
-        <div className="flex items-center space-x-2">
-          <Select
-            value={selectedYear}
-            onValueChange={(value: string) => {
-              updateColumnFilters({ id: "year", value });
-            }}
-          >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select Year" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Year</SelectLabel>
-                {years.map((year) => (
-                  <SelectItem key={year} value={`${year}`}>
-                    {year}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
+        <div className="flex w-full items-center justify-between sm:w-auto sm:space-x-4">
+          {/* Year Filter */}
+          <div className="flex items-center space-x-2">
+            <Select
+              value={selectedYear}
+              onValueChange={(value: string) => {
+                updateColumnFilters({ id: "year", value });
+              }}
+            >
+              <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectValue placeholder="Select Year" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectLabel>Year</SelectLabel>
+                  {years.map((year) => (
+                    <SelectItem key={year} value={`${year}`}>
+                      {year}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </div>
 
-        {/* Region Filter */}
-        <div className="flex items-center space-x-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-[200px] justify-start">
-                {formatSelectedRegions(selectedRegion)}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0" align="start">
-              <Command>
-                <CommandInput placeholder="Search regions..." />
-                <CommandList>
-                  <CommandEmpty>No regions found.</CommandEmpty>
-                  <CommandGroup>
-                    {uniqueRegions.map((region) => {
-                      // Convert the current region to its mapped name
-                      const mappedRegion = regionNameMap[region] || region;
+          {/* Region Filter */}
+          <div className="flex items-center space-x-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-[200px] justify-start">
+                  {formatSelectedRegions(selectedRegion)}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[200px] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Search regions..." />
+                  <CommandList>
+                    <CommandEmpty>No regions found.</CommandEmpty>
+                    <CommandGroup>
+                      {uniqueRegions.map((region) => {
+                        // Convert the current region to its mapped name
+                        const mappedRegion = regionNameMap[region] || region;
 
-                      // Check if the region (either original or mapped) is selected
-                      const isSelected = selectedRegion?.some(
-                        (selectedR) =>
-                          selectedR === region || selectedR === mappedRegion
-                      );
+                        // Check if the region (either original or mapped) is selected
+                        const isSelected = selectedRegion?.some(
+                          (selectedR) =>
+                            selectedR === region || selectedR === mappedRegion
+                        );
 
-                      return (
-                        <CommandItem
-                          key={region}
-                          value={region}
-                          onSelect={() => {
-                            // Convert display name back to original region key
-                            const originalRegion =
-                              regionFilterMap[region] || region;
-
-                            // If the region is already selected, remove it
-                            const currentRegions = selectedRegion || [];
-                            const newRegions = currentRegions.includes(
-                              mappedRegion
-                            )
-                              ? currentRegions.filter((r) => r !== mappedRegion)
-                              : [...currentRegions, mappedRegion];
-
-                            // Update filters with the new regions
-                            // If no regions are selected, pass an empty array to show all data
-                            updateColumnFilters({
-                              id: "region",
-                              value:
-                                newRegions.length > 0
-                                  ? newRegions.map(
-                                      (r) =>
-                                        Object.keys(regionNameMap).find(
-                                          (key) => regionNameMap[key] === r
-                                        ) || r
-                                    )
-                                  : [], // Pass an empty string to show all data
-                            });
-                          }}
-                        >
-                          <div className="mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary">
-                            {isSelected && (
-                              <CheckIcon className="h-4 w-4 text-green-500" />
-                            )}
-                          </div>
-                          <span>{mappedRegion}</span>
-                        </CommandItem>
-                      );
-                    })}
-                  </CommandGroup>
-                  {selectedRegion && selectedRegion.length > 0 && (
-                    <>
-                      <CommandList>
-                        <CommandGroup>
+                        return (
                           <CommandItem
+                            key={region}
+                            value={region}
                             onSelect={() => {
-                              // Remove region filter
-                              setColumnFilters(
-                                columnFilters.filter(
-                                  (filter) => filter.id !== "region"
-                                )
-                              );
+                              // Convert display name back to original region key
+                              const originalRegion =
+                                regionFilterMap[region] || region;
+
+                              // If the region is already selected, remove it
+                              const currentRegions = selectedRegion || [];
+                              const newRegions = currentRegions.includes(
+                                mappedRegion
+                              )
+                                ? currentRegions.filter(
+                                    (r) => r !== mappedRegion
+                                  )
+                                : [...currentRegions, mappedRegion];
+
+                              // Update filters with the new regions
+                              // If no regions are selected, pass an empty array to show all data
+                              updateColumnFilters({
+                                id: "region",
+                                value:
+                                  newRegions.length > 0
+                                    ? newRegions.map(
+                                        (r) =>
+                                          Object.keys(regionNameMap).find(
+                                            (key) => regionNameMap[key] === r
+                                          ) || r
+                                      )
+                                    : [], // Pass an empty string to show all data
+                              });
                             }}
-                            className="text-red-500"
                           >
-                            Clear Regions
+                            <div className="mr-2 flex h-4 w-4 items-center justify-center rounded-sm border border-primary">
+                              {isSelected && (
+                                <CheckIcon className="h-4 w-4 text-green-500" />
+                              )}
+                            </div>
+                            <span>{mappedRegion}</span>
                           </CommandItem>
-                        </CommandGroup>
-                      </CommandList>
-                    </>
-                  )}
-                </CommandList>
-              </Command>
-            </PopoverContent>
-          </Popover>
+                        );
+                      })}
+                    </CommandGroup>
+                    {selectedRegion && selectedRegion.length > 0 && (
+                      <>
+                        <CommandList>
+                          <CommandGroup>
+                            <CommandItem
+                              onSelect={() => {
+                                // Remove region filter
+                                setColumnFilters(
+                                  columnFilters.filter(
+                                    (filter) => filter.id !== "region"
+                                  )
+                                );
+                              }}
+                              className="text-red-500"
+                            >
+                              Clear Regions
+                            </CommandItem>
+                          </CommandGroup>
+                        </CommandList>
+                      </>
+                    )}
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </div>
 
@@ -437,8 +441,38 @@ export function DataTable<TData extends { id: string; region: string }>({
         </Table>
       </div>
 
+      {/* Responsive Pagination */}
+      <div className="md:hidden flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0 p-4">
+        <div className="flex items-center space-x-2">
+          <p className="text-sm font-medium">
+            Page {table.getState().pagination.pageIndex + 1} of{" "}
+            {table.getPageCount()}
+          </p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.previousPage()}
+            disabled={!table.getCanPreviousPage()}
+          >
+            <ChevronLeft className="h-4 w-4" />
+            <span className="sr-only">Previous page</span>
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => table.nextPage()}
+            disabled={!table.getCanNextPage()}
+          >
+            <ChevronRight className="h-4 w-4" />
+            <span className="sr-only">Next page</span>
+          </Button>
+        </div>
+      </div>
+
       {/* Pagination Controls */}
-      <div className="flex items-center justify-between space-x-2 py-4">
+      <div className="hidden md:flex items-center justify-between space-x-2 py-4">
         <div className="flex items-center space-x-2">
           <Select
             value={`${table.getState().pagination.pageSize}`}
