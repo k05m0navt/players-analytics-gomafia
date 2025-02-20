@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { GlobalErrorBoundary } from "@/components/error-boundary/global-error-boundary";
 import { Analytics } from "@vercel/analytics/react";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata: Metadata = {
   title: "GoMafia Players Analytics",
@@ -39,6 +40,7 @@ export default function RootLayout({
           </GlobalErrorBoundary>
         </ThemeProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
